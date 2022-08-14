@@ -9,8 +9,12 @@ public class ConseguirMesh : MonoBehaviour
     [SerializeField] private string _directorio;
     [SerializeField] private string _formato;
 
-    public string CaminoParaArchivo()
+    [Space]
+
+    [SerializeField] private string _pathFinal;
+
+    public void CaminoParaArchivo()
     {
-        return EditorUtility.OpenFilePanel(_nombreVentana, _directorio, _formato);
+        _pathFinal = EditorUtility.OpenFilePanel(_nombreVentana, _directorio, _formato);
     }
 }

@@ -1,41 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public struct Plano
-{
-    public Vector3 Direccion;
-    public float Distancia;
-
-    public Plano(Vector3 direccion, float distancia)
-    {
-        Direccion = direccion;
-        Distancia = distancia;
-    }
-}
-
-public struct Triangulo
-{
-    private Vector3[] _vertices;
-
-    public Triangulo(Vector3 v1, Vector3 v2, Vector3 v3)
-    {
-        _vertices = new Vector3[3] { v1, v2, v3 };
-    }
-
-    public Triangulo(Vector3[] vertices)
-        : this(vertices[0], vertices[1], vertices[2])
-    {
-    }
-
-    public Vector3 this[int i] { get { return _vertices[i]; } }
-}
-
-public interface IDistribucionDePuntos
-{
-    public IEnumerable<float> Puntos(float extremoInferior, float extremoSuperior);
-}
 
 public static class ProcesarMesh
 {
@@ -55,14 +20,65 @@ public static class ProcesarMesh
 
     private static bool TrianguloIntersectaPlano(Triangulo triangulo, Plano plano)
     {
-        
-        
-        return false;
+        float[] valores = ValoresDeTriangulo(triangulo, plano);
+        return !((valores[0] > 0 && valores[1] > 0 && valores[2] > 0) || (valores[0] < 0 && valores[1] < 0 && valores[2] < 0));
     }
 
     private static float InterseccionTrianguloPlano(Triangulo triangulo, Plano plano)
     {
-        return 0f;
+        float[] valores = ValoresDeTriangulo(triangulo, plano);
+        Vector3[] mismoLado = new Vector3[2];
+        Vector3 ladoOpuesto;
+
+        if (valores[0] * valores[1] > 0)
+        {
+            mismoLado[0] = triangulo[0];
+            mismoLado[1] = triangulo[1];
+            ladoOpuesto = triangulo[2];
+        } 
+        else if (valores[1] * valores[2] > 0)
+        {
+            mismoLado[0] = triangulo[1];
+            mismoLado[1] = triangulo[2];
+            ladoOpuesto = triangulo[0];
+        } 
+        else
+        {
+            mismoLado[0] = triangulo[0];
+            mismoLado[1] = triangulo[2];
+            ladoOpuesto = triangulo[1];
+        }
+
+        Vector3[] proyeccionEnElPlano = new Vector3[2];
+
+        for (int i = 0; i < 2; i++)
+        {
+            Vector3 direccion = mismoLado[i] - ladoOpuesto;
+            proyeccionEnElPlano[i] = ladoOpuesto + direccion * PuntoInterseccionPlanoYDosPuntos(plano, ladoOpuesto, direccion);
+        }
+
+        return Vector3.Distance(proyeccionEnElPlano[0], proyeccionEnElPlano[1]);
+    }
+
+    private static float PuntoInterseccionPlanoYDosPuntos(Plano plano, Vector3 inicio, Vector3 direccion)
+    {
+        Vector3 direccionPlano = plano.Direccion;
+        float distancia = plano.Distancia;
+
+        return (Vector3.Dot(direccionPlano, direccionPlano) * distancia - Vector3.Dot(direccionPlano, inicio)) / Vector3.Dot(direccionPlano, direccion);
+    }
+
+    private static float[] ValoresDeTriangulo(Triangulo triangulo, Plano plano)
+    {
+        Vector3 puntoEnPlano = plano.Distancia * plano.Direccion;
+        float[] valores = new float[3];
+
+        for (int i = 0; i < 3; i++)
+        {
+            Vector3 verticeTransladado = triangulo[i] - puntoEnPlano;
+            valores[i] = Vector3.Dot(verticeTransladado, plano.Direccion);
+        }
+        return valores;
     }
 
     public static float DiametroMaximo(Mesh mesh, Vector3 direccion, IDistribucionDePuntos distribucion)
