@@ -136,6 +136,11 @@ public static class ProcesarMesh
         return new Tuple<float, float>(inicio, final);
     }
 
+    public static Vector3 CentroDeUnaMesh(Mesh mesh)
+    {
+        return CentroDeVertices(mesh.vertices);
+    }
+
     private static Vector3 CentroDeVertices(Vector3[] vertices)
     {
         Vector3 centro = Vector3.zero;

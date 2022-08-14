@@ -6,12 +6,24 @@ using UnityEngine;
 public class MostrarMesh : MonoBehaviour
 {
     [SerializeField] private EventoMeshSO _eventoMesh;
+    [SerializeField] private EventoVoidSO _eventoActualizoMesh;
 
     private MeshFilter _meshFilter;
-
-    private void Awake()
+    private Mesh _mesh
     {
-        _meshFilter = GetComponent<MeshFilter>();
+        get
+        {
+            if (_meshFilter == null)
+                _meshFilter = GetComponent<MeshFilter>();
+            return _meshFilter.sharedMesh;
+        }
+
+        set
+        {
+            if (_meshFilter == null)
+                _meshFilter = GetComponent<MeshFilter>();
+            _meshFilter.sharedMesh = value;
+        }
     }
 
     private void OnEnable()
@@ -28,6 +40,10 @@ public class MostrarMesh : MonoBehaviour
 
     private void ActualizarMesh(Mesh mesh)
     {
-        _meshFilter.sharedMesh = mesh;
+        _mesh = mesh;
+        _eventoActualizoMesh?.Invoke();
     }
+
+    [ContextMenu("Mandar mesh actual")]
+    private void MandarMeshActual() => _eventoMesh?.Invoke(_mesh);
 }
