@@ -10,5 +10,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 78dce86c36688f74dab86f252405ae80, type: 3}
-  m_Name: EventoActualizarDiametroMaximo
+  m_Name: EventoActualizarPerimetroMaximo
   m_EditorClassIdentifier: 
