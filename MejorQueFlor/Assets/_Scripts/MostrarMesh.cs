@@ -2,28 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(MeshFilter))]
 public class MostrarMesh : MonoBehaviour
 {
-    [SerializeField] private EventoMeshSO _eventoMesh;
+    [SerializeField] private Material _material;
+
+    [Space]
+
+    [SerializeField] private EventoMeshesSO _eventoMesh;
     [SerializeField] private EventoVoidSO _eventoActualizoMesh;
 
-    private MeshFilter _meshFilter;
-    private Mesh _mesh
-    {
-        get
-        {
-            if (_meshFilter == null)
-                _meshFilter = GetComponent<MeshFilter>();
-            return _meshFilter.sharedMesh;
-        }
+    private List<GameObject> _renderMeshes = new List<GameObject>();
 
-        set
-        {
-            if (_meshFilter == null)
-                _meshFilter = GetComponent<MeshFilter>();
-            _meshFilter.sharedMesh = value;
-        }
+    private void Awake()
+    {
+        _renderMeshes = new List<GameObject>();
     }
 
     private void OnEnable()
@@ -38,12 +30,41 @@ public class MostrarMesh : MonoBehaviour
             _eventoMesh.Evento -= ActualizarMesh;
     }
 
-    private void ActualizarMesh(Mesh mesh)
+    private void ActualizarMesh(Mesh[] meshes)
     {
-        _mesh = mesh;
+        LiberarMeshesAnteriores();
+
+        foreach (Mesh mesh in meshes)
+        {
+            GameObject renderMesh = CrearObjetoParaMostrarMesh(mesh);
+            _renderMeshes.Add(renderMesh);
+        }
+
         _eventoActualizoMesh?.Invoke();
     }
 
-    [ContextMenu("Mandar mesh actual")]
-    private void MandarMeshActual() => _eventoMesh?.Invoke(_mesh);
+    private void LiberarMeshesAnteriores()
+    {
+        foreach (GameObject renderMesh in _renderMeshes)
+            Destroy(renderMesh);
+        _renderMeshes.Clear();
+    }
+
+    private GameObject CrearObjetoParaMostrarMesh(Mesh mesh)
+    {
+        GameObject renderMesh = new GameObject("Render");
+        renderMesh.transform.parent = transform;
+
+        MeshFilter meshFilter = renderMesh.AddComponent<MeshFilter>();
+        meshFilter.sharedMesh = mesh;
+
+        MeshRenderer meshRenderer = renderMesh.AddComponent<MeshRenderer>();
+        if (_material != null)
+            meshRenderer.sharedMaterial = _material;
+
+        return renderMesh;
+    }
+
+    [ContextMenu("Mandar renderMesh actual")]
+    private void MandarMeshActual() => _eventoActualizoMesh?.Invoke();
 }

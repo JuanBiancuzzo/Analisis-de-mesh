@@ -4,11 +4,11 @@ using UnityEngine;
 
 public static class ProcesarMesh
 {
-    public static float Diametro(List<Triangulo> triangulos, Plano plano)
+    public static float Perimetro(Mesh[] meshes, Plano plano)
     {
         float diametro = 0f;
         
-        foreach (Triangulo triangulo in triangulos)
+        foreach (Triangulo triangulo in TriangulosDeUnaMesh(meshes))
         {
             if (!TrianguloIntersectaPlano(triangulo, plano))
                 continue;
@@ -81,72 +81,82 @@ public static class ProcesarMesh
         return valores;
     }
 
-    public static float DiametroMaximo(Mesh mesh, Vector3 direccion, IDistribucionDePuntos distribucion)
+    public static float PerimetroMaximo(Mesh[] meshes, Vector3 direccion, IDistribucionDePuntos distribucion)
     {
         float diametroMaximo = -1f;
-        List<Triangulo> triangulos = TriangulosDeUnaMesh(mesh);
-        Tuple<float, float> extremos = ExtremosEnUnaDireccion(mesh, direccion);
+        Tuple<float, float> extremos = ExtremosEnUnaDireccion(meshes, direccion);
 
         foreach (float distancia in distribucion.Puntos(extremos.Item1, extremos.Item2))
         {
             Plano plano = new Plano(direccion, distancia);
-            float diametro = Diametro(triangulos, plano);
+            float diametro = Perimetro(meshes, plano);
             diametroMaximo = Mathf.Max(diametroMaximo, diametro);
         }
 
         return diametroMaximo;
     }
 
-    private static List<Triangulo> TriangulosDeUnaMesh(Mesh mesh)
+    private static IEnumerable<Triangulo> TriangulosDeUnaMesh(Mesh[] meshes)
     {
-        List<Triangulo> triangulos = new List<Triangulo>();
-        Vector3[] vertices = mesh.vertices;
-        int[] indices = mesh.GetIndices(0);
+        Triangulo triangulo = new Triangulo();
 
-        for (int i = 0; i < indices.Length; i += 3)
+        foreach (Mesh mesh in meshes)
         {
-            Vector3[] triangulo = new Vector3[3];
-            for (int j = 0; j < 3; j++)
-                triangulo[j] = vertices[indices[i + j]];
-            triangulos.Add(new Triangulo(triangulo));
-        }
+            Vector3[] vertices = mesh.vertices;
+            int[] indices = mesh.GetIndices(0);
 
-        return triangulos;
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                Vector3[] verticesNuevos = new Vector3[3];
+                for (int j = 0; j < 3; j++)
+                    verticesNuevos[j] = vertices[indices[i + j]];
+
+                triangulo.Set(verticesNuevos);
+                yield return triangulo;
+            }
+        }
     }
 
-    private static Tuple<float, float> ExtremosEnUnaDireccion(Mesh mesh, Vector3 direccion)
+    public static Tuple<float, float> ExtremosEnUnaDireccion(Mesh[] meshes, Vector3 direccion)
     {
         float inicio = 0f, final = 0f;
-        Vector3[] vertices = mesh.vertices;
-        Vector3 centro = CentroDeVertices(vertices);
+        Vector3 centro = CentroDeUnaMesh(meshes);
 
-        foreach (Vector3 vertice in vertices)
+        foreach (Mesh mesh in meshes)
         {
-            Vector3 verticeProyectado = ProyectarEnRecta(centro, direccion, vertice);
+            Vector3[] vertices = mesh.vertices;
+            foreach (Vector3 vertice in vertices)
+            {
+                Vector3 verticeProyectado = ProyectarEnRecta(centro, direccion, vertice);
 
-            Vector3 diferencia = verticeProyectado - centro;
-            float distancia = diferencia.magnitude;
+                Vector3 diferencia = verticeProyectado - centro;
+                float distancia = diferencia.magnitude;
 
-            if (Vector3.Dot(diferencia, direccion) > 0)
-                final = Mathf.Max(final, distancia);
-            else
-                inicio = Mathf.Min(inicio, -distancia);
+                if (Vector3.Dot(diferencia, direccion) > 0)
+                    final = Mathf.Max(final, distancia);
+                else
+                    inicio = Mathf.Min(inicio, -distancia);
+            }
         }
 
         return new Tuple<float, float>(inicio, final);
     }
 
-    public static Vector3 CentroDeUnaMesh(Mesh mesh)
-    {
-        return CentroDeVertices(mesh.vertices);
-    }
-
-    private static Vector3 CentroDeVertices(Vector3[] vertices)
+    public static Vector3 CentroDeUnaMesh(Mesh[] meshes)
     {
         Vector3 centro = Vector3.zero;
-        foreach (Vector3 vertice in vertices)
-            centro += vertice;
-        centro /= vertices.Length;
+        int cantidadTotal = 0;
+
+        foreach (Mesh mesh in meshes)
+        {
+            foreach (Vector3 vertice in mesh.vertices)
+                centro += vertice;
+
+            cantidadTotal += mesh.vertexCount;
+        }
+
+        centro /= cantidadTotal;
+        
         return centro;
     }
 

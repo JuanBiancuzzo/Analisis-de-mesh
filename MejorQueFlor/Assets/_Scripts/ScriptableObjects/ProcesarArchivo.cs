@@ -5,7 +5,7 @@ using Parabox.Stl;
 public class ProcesarArchivo : ScriptableObject
 {
     [SerializeField] private EventoStringSO _eventoPath;
-    [SerializeField] private EventoMeshSO _eventoMesh;
+    [SerializeField] private EventoMeshesSO _eventoMeshes;
 
     private void OnEnable()
     {
@@ -22,18 +22,6 @@ public class ProcesarArchivo : ScriptableObject
     private void MandarMesh(string path)
     {
         Mesh[] meshes = Importer.Import(path);
-        Mesh meshParaEnviar = null;
-
-        foreach (Mesh mesh in meshes)
-            if (mesh.vertexCount > 0)
-            {
-                meshParaEnviar = mesh;
-                break;
-            }
-
-        if (meshParaEnviar != null)
-            _eventoMesh?.Invoke(meshParaEnviar);
-        else
-            Debug.Log("No se pudo importar ningun archivo");
+        _eventoMeshes?.Invoke(meshes);
     }
 }
