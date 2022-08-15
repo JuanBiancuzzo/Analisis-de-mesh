@@ -1163,7 +1163,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -5, y: -192}
+  m_AnchoredPosition: {x: 21, y: -194}
   m_SizeDelta: {x: 200, y: -396}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &1096052513
@@ -1220,7 +1220,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -1249,7 +1249,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -54.637695, w: 0}
+  m_margin: {x: 0, y: 0, z: -160.1655, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1276,7 +1276,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   "_textoAcompa\xF1ante": 'Perimetro maximo: '
-  _eventoVamorPerimetroMaximo: {fileID: 11400000, guid: 9deedf1ecb8d5df4c963f9b83dcfbb75,
+  _eventoActualizarValor: {fileID: 11400000, guid: 9deedf1ecb8d5df4c963f9b83dcfbb75,
     type: 2}
 --- !u!1 &1103090052
 GameObject:
